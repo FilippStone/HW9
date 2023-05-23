@@ -1,0 +1,65 @@
+# Нахождение корней квадратного уравнения
+# Генерация csv файла с тремя случайными числами в каждой строке.
+# 100-1000 строк.
+# Декоратор, запускающий функцию нахождения корней квадратного
+# уравнения с каждой тройкой чисел из csv файла.
+# Декоратор, сохраняющий переданные параметры и результаты работы
+# функции в json файл.
+
+import csv
+import json
+from datetime import datetime
+import random
+
+
+def calculate_roots(func):
+    def wrapper(*args):
+        result = func(*args)
+        params = {"a": args[0], "b": args[1], "c": args[2]}
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data = {"params": params, "result": result, "timestamp": timestamp}
+
+        with open("hiha.json", "a") as f:
+            f.write(json.dumps(data))
+            f.write("\n")
+
+        return result
+
+    return wrapper
+
+
+@calculate_roots
+def roots_quadratic_equation(a: int, b: int, c: int) -> list[complex | float]:
+    list_ = []
+    d = b ** 2 - 4 * a * c
+    if d > 0:
+        x1 = (- b - d ** 0.5) / (2 * a)
+        x2 = (- b + d ** 0.5) / (2 * a)
+        list_.append(x1)
+        list_.append(x2)
+    elif d == 0:
+        x = - b / (2 * a)
+        list_.append(x)
+    else:
+        d = complex(d)
+        x1 = (- b - d ** 0.5) / (2 * a)
+        x2 = (- b + d ** 0.5) / (2 * a)
+        list_.append(str(x1))
+        list_.append(str(x2))
+    return list_
+
+
+def generate_csv_file(n: int):
+    with open("numbers.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        for i in range(n):
+            row = [random.randint(1, 10) for _ in range(3)]
+            writer.writerow(row)
+
+
+if __name__ == '__main__':
+    generate_csv_file(100)
+    with open("numbers.csv", newline="") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            roots_quadratic_equation(*map(int, row))
